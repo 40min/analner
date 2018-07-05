@@ -23,20 +23,20 @@ def request_page(url):
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     r = http.request('GET', url, headers=headers)
     if r.status != 200:
-        raise Exception(f"Page {url} is unaccessible")
+        raise Exception("Page {} is unaccessible".format(url))
     return r.data
 
 
 def get_current_date_file_name():
-    ts = datetime.now().strftime("%y-%m-%d")
-    return f"{grabbed_headers_path}/{ts}.txt"
+    ts = datetime.now().strftime("%Y-%m-%d")
+    return "{}/{}.txt".format(grabbed_headers_path, ts)
 
 
 def get_header_hash(header):
-    return md5(header.encode('utf-8'))
+    return md5(header.encode('utf-8')).hexdigest()
 
 
-def save_data(file_name, headers_list):
+def save_data(file_name, news_headers):
     data_hashes = []
     with open(file_name, 'a+') as f:
         f.seek(0)
@@ -49,35 +49,34 @@ def save_data(file_name, headers_list):
                 )
             )
 
-        # stopping here on bug
-        for h in headers_list:
+        for h in news_headers:
             if get_header_hash(h) not in data_hashes:
-                f.write(f'{h}\n')
+                f.write('{}\n'.format(h))
 
 
-def fetch_fresh_headers(current_file_name):
-    page = request_page(target_base)
-    soup = BeautifulSoup(page, 'html5lib')
-    headers_list_mobile = list(
+def fetch_page_headers(page_html):
+    soup = BeautifulSoup(page_html, 'html5lib')
+    headers_mobile = list(
         map(
             lambda a: a.string,
             soup.find_all('span', {'class': 'helpers_show_mobile-small'})
         )
     )
-    headers_list = list(
+    headers_body = list(
         map(
             lambda a: a.find('span', {'class': 'text-i'}).string,
             soup.find_all('a', {'class': 'b-teasers-2__teaser-i'})
         )
     )
-    headers_list_full = headers_list + headers_list_mobile
+    headers_list_full = headers_body + headers_mobile
 
-    print(f'found {len(headers_list_full)}:')
+    print('found {}'.format(len(headers_list_full)))
 
     return headers_list_full
 
 
 if __name__ == "__main__":
-    current_fn = get_current_date_file_name()
-    headers_list = fetch_fresh_headers(current_fn)
-    save_data(current_fn, headers_list)
+    page = request_page(target_base)
+    headers_list = fetch_page_headers(page)
+    current_filename = get_current_date_file_name()
+    save_data(current_filename, headers_list)

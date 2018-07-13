@@ -1,22 +1,27 @@
+import os
 import urllib3
+import logging
 from datetime import datetime
 from hashlib import md5
 
 import certifi
 from bs4 import BeautifulSoup
 
-
-grabbed_headers_path = './grabbed_headers'
-
+current_dir = os.path.dirname(os.path.realpath(__file__))
+grabbed_headers_path = '{}/grabbed_headers'.format(current_dir)
 target_base = 'https://www.onliner.by/'
-
 cookies = {}
-
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/61.0.3163.100 Safari/537.36',
     'Cookie':  ''
 }
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 
 def request_page(url):
@@ -49,9 +54,9 @@ def save_data(file_name, news_headers):
                 )
             )
 
-        for h in news_headers:
-            if get_header_hash(h) not in data_hashes:
-                f.write('{}\n'.format(h))
+        for header_txt in news_headers:
+            if get_header_hash(header_txt) not in data_hashes:
+                f.write(header_txt)
 
 
 def fetch_page_headers(page_html):
@@ -70,7 +75,7 @@ def fetch_page_headers(page_html):
     )
     headers_list_full = headers_body + headers_mobile
 
-    print('found {}'.format(len(headers_list_full)))
+    logging.info('found {}'.format(len(headers_list_full)))
 
     return headers_list_full
 

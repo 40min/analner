@@ -16,6 +16,7 @@ headers = {
                   'Chrome/61.0.3163.100 Safari/537.36',
     'Cookie':  ''
 }
+min_header_length = 25
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -56,7 +57,7 @@ def save_data(file_name, news_headers):
 
         for header_txt in news_headers:
             if get_header_hash(header_txt) not in data_hashes:
-                f.write(header_txt)
+                f.write('{}\n'.format(header_txt))
 
 
 def fetch_page_headers(page_html):
@@ -74,6 +75,7 @@ def fetch_page_headers(page_html):
         )
     )
     headers_list_full = headers_body + headers_mobile
+    headers_list_full = list(filter(lambda h: len(h) >= min_header_length, headers_list_full))
 
     logging.info('found {}'.format(len(headers_list_full)))
 

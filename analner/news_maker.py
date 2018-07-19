@@ -21,7 +21,7 @@ class SpacyNewLinedText(markovify.NewlineText):
 
 def get_news_model():
     news_text = ''
-    news_file_path_pattern = f'{grabbed_headers_path}/*.txt'
+    news_file_path_pattern = f'{data_path}/*.txt'
     files = glob.glob(news_file_path_pattern)
     for file in files:
         with open(file) as f:

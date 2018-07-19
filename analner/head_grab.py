@@ -7,8 +7,11 @@ from hashlib import md5
 import certifi
 from bs4 import BeautifulSoup
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-grabbed_headers_path = '{}/grabbed_headers'.format(current_dir)
+
+data_path = os.environ.get('DATA_PATH')
+if not data_path:
+    raise Exception("Please setup path to storing data [data_path] var")
+
 target_base = 'https://www.onliner.by/'
 cookies = {}
 headers = {
@@ -34,7 +37,7 @@ def request_page(url):
 
 def get_current_date_file_name():
     ts = datetime.now().strftime("%Y-%m-%d")
-    return "{}/{}.txt".format(grabbed_headers_path, ts)
+    return "{}/{}.txt".format(data_path, ts)
 
 
 def get_header_hash(header):

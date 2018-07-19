@@ -4,7 +4,7 @@ import glob
 import markovify
 import spacy
 
-from head_grab import grabbed_headers_path
+from analner.head_grab import data_path
 
 
 nlp = spacy.load("xx")
@@ -33,7 +33,7 @@ def get_news_model():
 
 
 def make_fun():
-    model_file = './news.json'
+    model_file = f'{data_path}/news.json'
     if os.path.isfile(model_file):
         try:
             with open(model_file, 'r') as saved:

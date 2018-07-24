@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analner",
-    version="0.0.1",
+    version="0.0.2",
     author="Andrew Sorokin",
     author_email="i40mines@yandex.ru",
-    description="Compiler of funny news based on onliner news headers",
+    description="Compiler of funny news based on onliner news HEADERS_DEFAULT",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/40min/analner.git",

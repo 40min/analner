@@ -15,6 +15,7 @@ HEADERS_DEFAULT = {
                   'Chrome/61.0.3163.100 Safari/537.36',
     'Cookie':  ''
 }
+MIN_PHRASE_WORDS = 7
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -85,11 +86,20 @@ class HeadGrab:
             )
         )
         headers_list_full = headers_body + headers_mobile
+        headers_filtered = HeadGrab.get_filtered_headers(headers_list_full)
 
-        logging.info('found {}'.format(len(headers_list_full)))
+        logging.info('found {}'.format(len(headers_filtered)))
 
-        return headers_list_full
+        return headers_filtered
 
+    @staticmethod
+    def get_filtered_headers(headers):
+        filtered = []
+        for header in headers:
+            if len(header.split(' ')) > MIN_PHRASE_WORDS:
+                clear_header = header.replace('»', '').replace('«', '')
+                filtered.append(clear_header)
+        return filtered
 
 def grab():
     data_path = os.environ.get('DATA_PATH')

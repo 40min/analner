@@ -47,7 +47,7 @@ class FunMaker:
             with open(model_file, 'w') as saving:
                 saving.write(text_model.to_json())
 
-        for i in range(1):
+        for i in range(5):
             s = text_model.make_sentence()
             if s:
                 result.append(s)

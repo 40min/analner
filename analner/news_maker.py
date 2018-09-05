@@ -4,6 +4,8 @@ import glob
 import markovify
 import spacy
 
+MAX_ATTEMPTS_TO_GET_PHRASE = 100
+
 nlp = spacy.load("xx")
 
 
@@ -20,8 +22,44 @@ class FunMaker:
 
     def __init__(self, data_path):
         self.data_path = data_path
+        self._text_model = self._get_model()
 
-    def get_news_model(self):
+    def make_phrases(self, phrases_needed=1):
+        result = []
+        attempts = MAX_ATTEMPTS_TO_GET_PHRASE
+        while attempts:
+            attempts -= 1
+            s = self._text_model.make_sentence()
+            if s and s not in result:
+                result.append(s)
+                if len(result) == phrases_needed:
+                    return result
+                attempts = MAX_ATTEMPTS_TO_GET_PHRASE
+        return result
+
+    def make_phrases_with(self, with_phrase):
+        with_parts = with_phrase.split(' ')[0:2]
+        if len(with_parts) != 2:
+            return None
+        with_phrase = ' '.join(with_parts)
+        attempts = MAX_ATTEMPTS_TO_GET_PHRASE
+        while attempts:
+            attempts -= 1
+            s = self._text_model.make_sentence_with_start(with_phrase, strict=False)
+            if s:
+                return s
+        return None
+
+    def _get_model(self):
+        model_file = '{}/news.json'.format(self.data_path)
+        text_model = self._load_saved_model(model_file)
+        if not text_model:
+            text_model = self._get_model_from_text()
+            with open(model_file, 'w') as saving:
+                saving.write(text_model.to_json())
+        return text_model
+
+    def _get_model_from_text(self):
         news_text = ''
         news_file_path_pattern = '{}/*.txt' . format(self.data_path)
         files = glob.glob(news_file_path_pattern)
@@ -33,25 +71,16 @@ class FunMaker:
 
         return news_model
 
-    def make_fun(self):
-        result = []
-        model_file = '{}/news.json' . format(self.data_path)
+    @staticmethod
+    def _load_saved_model(model_file):
+        text_model = None
         if os.path.isfile(model_file):
             try:
                 with open(model_file, 'r') as saved:
                     text_model = SpacyNewLinedText.from_json(saved.read())
             except ValueError:
                 logging.info("No JSON saved data found")
-        else:
-            text_model = self.get_news_model()
-            with open(model_file, 'w') as saving:
-                saving.write(text_model.to_json())
-
-        for i in range(5):
-            s = text_model.make_sentence()
-            if s:
-                result.append(s)
-        return result
+        return text_model
 
 
 if __name__ == "__main__":
@@ -60,4 +89,7 @@ if __name__ == "__main__":
         raise Exception("Please setup path to storing data [data_path] var")
 
     fm = FunMaker(data_path)
-    print(fm.make_fun())
+    for f in fm.make_phrases(5):
+        print(f)
+
+    print(fm.make_phrases_with('список'))

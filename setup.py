@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analner",
-    version="0.0.4",
+    version="0.0.5",
     author="Andrew Sorokin",
     author_email="i40mines@yandex.ru",
     description="Compiler of funny news based on onliner news",

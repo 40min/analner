@@ -4,6 +4,7 @@ import glob
 import markovify
 import spacy
 
+READY_TO_USE_MODEL_FILE_NAME = 'news.json'
 MAX_ATTEMPTS_TO_GET_PHRASE = 100
 
 try:
@@ -54,8 +55,17 @@ class FunMaker:
                 return s
         return None
 
+    def reload_model_from_txt(self):
+        model_file = self._get_model_full_path()
+        if os.path.isfile(model_file):
+            os.remove(model_file)
+        self._text_model = self._get_model()
+
+    def _get_model_full_path(self):
+        return '{}/{}'.format(self.data_path, READY_TO_USE_MODEL_FILE_NAME)
+
     def _get_model(self):
-        model_file = '{}/news.json'.format(self.data_path)
+        model_file = self._get_model_full_path()
         text_model = self._load_saved_model(model_file)
         if not text_model:
             text_model = self._get_model_from_text()
@@ -93,6 +103,7 @@ if __name__ == "__main__":
         raise Exception("Please setup path to storing data [data_path] var")
 
     fm = FunMaker(data_path)
+    fm.reload_model_from_txt()
     for f in fm.make_phrases(5):
         print(f)
 

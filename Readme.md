@@ -16,4 +16,4 @@
 * see https://github.com/GuyAglionby/chatsimulatorbot
 * try combine:
     Combining models https://github.com/jsvine/markovify#combining-models
-* post setup script
+* split model json files by months

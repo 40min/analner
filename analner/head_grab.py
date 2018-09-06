@@ -44,17 +44,19 @@ class HeadGrab:
 
     def run(self):
         page = request_page(self.target_url)
-        headers_list = self.fetch_page_headers(page)
+        headers_list = self._fetch_page_headers(page)
         current_filename = self.get_current_date_file_name()
-        self.save_data(current_filename, headers_list)
+        news_added = self._save_data(current_filename, headers_list)
+        return news_added
 
     def get_current_date_file_name(self):
         ts = datetime.now().strftime("%Y-%m-%d")
         return "{}/{}.txt".format(self.data_path, ts)
 
     @staticmethod
-    def save_data(file_name, news_headers):
+    def _save_data(file_name, news_headers):
         data_hashes = []
+        news_added = 0
         with open(file_name, 'a+') as f:
             f.seek(0)
             data = f.read()
@@ -69,9 +71,11 @@ class HeadGrab:
             for header_txt in news_headers:
                 if get_header_hash(header_txt) not in data_hashes:
                     f.write('{}\n'.format(header_txt))
+                    news_added += 1
+        return news_added
 
     @staticmethod
-    def fetch_page_headers(page_html):
+    def _fetch_page_headers(page_html):
         soup = BeautifulSoup(page_html, 'html5lib')
         headers_mobile = list(
             map(
@@ -86,20 +90,21 @@ class HeadGrab:
             )
         )
         headers_list_full = headers_body + headers_mobile
-        headers_filtered = HeadGrab.get_filtered_headers(headers_list_full)
+        headers_filtered = HeadGrab._get_filtered_headers(headers_list_full)
 
         logging.info('found {}'.format(len(headers_filtered)))
 
         return headers_filtered
 
     @staticmethod
-    def get_filtered_headers(headers):
+    def _get_filtered_headers(headers):
         filtered = []
         for header in headers:
             if len(header.split(' ')) > MIN_PHRASE_WORDS:
                 clear_header = header.replace('»', '').replace('«', '')
                 filtered.append(clear_header)
         return filtered
+
 
 def grab():
     data_path = os.environ.get('DATA_PATH')

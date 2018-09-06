@@ -6,7 +6,11 @@ import spacy
 
 MAX_ATTEMPTS_TO_GET_PHRASE = 100
 
-nlp = spacy.load("xx")
+try:
+    nlp = spacy.load("xx")
+except OSError as e:
+    from spacy.cli import download
+    download('xx')
 
 
 class SpacyNewLinedText(markovify.NewlineText):

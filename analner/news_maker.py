@@ -78,7 +78,7 @@ class FunMaker:
         news_file_path_pattern = '{}/*.txt' . format(self.data_path)
         files = glob.glob(news_file_path_pattern)
         for file in files:
-            with open(file) as f:
+            with open(file, encoding='utf-8') as f:
                 text = f.read()
                 news_text = f'{news_text}\n{text}'
         news_model = SpacyNewLinedText(news_text)

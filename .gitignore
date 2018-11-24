@@ -100,4 +100,4 @@ ENV/
 
 .DS_Store
 
-grabbed_headers/*txt
+./data

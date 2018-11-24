@@ -17,3 +17,4 @@
 * try combine:
     Combining models https://github.com/jsvine/markovify#combining-models
 * split model json files by months
+* try to use cloud for file storing

@@ -103,7 +103,7 @@ if __name__ == "__main__":
         raise Exception("Please setup path to storing data [data_path] var")
 
     fm = FunMaker(data_path)
-    fm.reload_model_from_txt()
+    #fm.reload_model_from_txt()
     for f in fm.make_phrases(5):
         print(f)
 

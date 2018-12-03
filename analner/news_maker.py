@@ -4,6 +4,8 @@ import glob
 import markovify
 import spacy
 
+from analner.utils.dropbox_sync import DropboxSync
+
 READY_TO_USE_MODEL_FILE_NAME = 'news.json'
 MAX_ATTEMPTS_TO_GET_PHRASE = 100
 
@@ -25,9 +27,23 @@ class SpacyNewLinedText(markovify.NewlineText):
 
 class FunMaker:
 
-    def __init__(self, data_path):
+    dropbox_syncer = None
+
+    def __init__(self, data_path, dropbox_token=None):
         self.data_path = data_path
+        self.dropbox_token = dropbox_token
         self._text_model = self._get_model()
+        self.sync_with_dropbox()
+
+    def sync_with_dropbox(self):
+        if not self.dropbox_token:
+            return
+        if not self.dropbox_syncer:
+            self.dropbox_syncer = DropboxSync(self.dropbox_token)
+        remote_path = self.data_path.strip('.')
+        synced = self.dropbox_syncer.sync_with_dropbox(self.data_path, remote_path)
+        if synced:
+            self.reload_model_from_txt()
 
     def make_phrases(self, phrases_needed=1):
         result = []
@@ -50,9 +66,12 @@ class FunMaker:
         attempts = MAX_ATTEMPTS_TO_GET_PHRASE
         while attempts:
             attempts -= 1
-            s = self._text_model.make_sentence_with_start(with_phrase, strict=False)
-            if s:
-                return s
+            try:
+                s = self._text_model.make_sentence_with_start(with_phrase, strict=False)
+                if s:
+                    return s
+            except KeyError:
+                pass
         return None
 
     def reload_model_from_txt(self):
@@ -98,13 +117,14 @@ class FunMaker:
 
 
 if __name__ == "__main__":
+    dropbox_token = os.environ.get('DROPBOX_TOKEN')
     data_path = os.environ.get('DATA_PATH')
     if not data_path:
         raise Exception("Please setup path to storing data [data_path] var")
 
-    fm = FunMaker(data_path)
-    #fm.reload_model_from_txt()
+    fm = FunMaker(data_path, dropbox_token)
     for f in fm.make_phrases(5):
         print(f)
+#        print(fm.make_phrases_with('Илона Маска'))
 
-    print(fm.make_phrases_with('список'))
+

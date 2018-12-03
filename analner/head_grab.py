@@ -3,6 +3,7 @@ import urllib3
 import logging
 from datetime import datetime
 from hashlib import md5
+from analner.utils.dropbox_sync import DropboxSync
 
 import certifi
 from bs4 import BeautifulSoup
@@ -38,16 +39,28 @@ def get_header_hash(header):
 
 class HeadGrab:
 
-    def __init__(self, data_path, target_url):
+    dropbox_syncer = None
+
+    def __init__(self, data_path, target_url, dropbox_token=None):
         self.data_path = data_path
         self.target_url = target_url
+        self.dropbox_token = dropbox_token
 
     def run(self):
         page = request_page(self.target_url)
         headers_list = self._fetch_page_headers(page)
         current_filename = self.get_current_date_file_name()
         news_added = self._save_data(current_filename, headers_list)
+        self.save_to_dropbox(current_filename)
         return news_added
+
+    def save_to_dropbox(self, current_filename):
+        if not self.dropbox_token:
+            return
+        if not self.dropbox_syncer:
+            self.dropbox_syncer = DropboxSync(self.dropbox_token)
+        remote_filename = current_filename.strip('.')
+        self.dropbox_syncer.upload_file(current_filename, remote_filename)
 
     def get_current_date_file_name(self):
         ts = datetime.now().strftime("%Y-%m-%d")
@@ -110,7 +123,8 @@ def grab():
     data_path = os.environ.get('DATA_PATH')
     if not data_path:
         raise Exception("Please setup path to storing data [data_path] var")
-    hg = HeadGrab(data_path, TARGET_URL)
+    dropbox_token = os.environ.get('DROPBOX_TOKEN', '')
+    hg = HeadGrab(data_path, TARGET_URL, dropbox_token)
     hg.run()
 
 

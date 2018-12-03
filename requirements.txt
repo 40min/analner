@@ -8,3 +8,4 @@ urllib3==1.22
 webencodings==0.5.1
 spacy==2.0.12
 https://github.com/explosion/spacy-models/releases/download/xx_ent_wiki_sm-2.0.0/xx_ent_wiki_sm-2.0.0.tar.gz
+dropbox

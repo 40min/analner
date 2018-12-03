@@ -17,4 +17,11 @@
 * try combine:
     Combining models https://github.com/jsvine/markovify#combining-models
 * split model json files by months
-* try to use cloud for file storing
+* create new files with ok phrases
+* try to del bad phrases
+
+last todo:
+* finish with utils/clean
+* add filtering of short headers
+* download lst grabbed and test on it
+* deploy to box

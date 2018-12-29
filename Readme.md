@@ -7,6 +7,7 @@
 ``` pip install -r ./requirements.txt ```
     * setup environment variables
         * DATA_PATH -- dir where will be stored text headers and models in json
+        * DROPBOX_TOKEN -- token of dropbox account to backup headers-files
 
 * as pip pkg from git:
     * pip install -e git+https://github.com/40min/analner.git@master#egg=analner
@@ -21,7 +22,5 @@
 * try to del bad phrases
 
 last todo:
-* finish with utils/clean
-* add filtering of short headers
 * download lst grabbed and test on it
 * deploy to box

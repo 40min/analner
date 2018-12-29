@@ -51,7 +51,8 @@ class HeadGrab:
         headers_list = self._fetch_page_headers(page)
         current_filename = self.get_current_date_file_name()
         news_added = self._save_data(current_filename, headers_list)
-        self.save_to_dropbox(current_filename)
+        if news_added:
+            self.save_to_dropbox(current_filename)
         return news_added
 
     def save_to_dropbox(self, current_filename):
@@ -70,7 +71,7 @@ class HeadGrab:
     def _save_data(file_name, news_headers):
         data_hashes = []
         news_added = 0
-        with open(file_name, 'a+') as f:
+        with open(file_name, 'a+', encoding='utf-8') as f:
             f.seek(0)
             data = f.read()
             if data:

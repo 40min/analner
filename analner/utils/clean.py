@@ -1,6 +1,7 @@
 import os
 
 MIN_LENGTH = 5
+MODEL_FILENAME = 'news.json'
 
 
 class Cleaner:
@@ -12,12 +13,25 @@ class Cleaner:
         self.target_dir = target_dir
         self.min_length = min_length
 
+    def run(self):
+        deleted_summary = 0
+        self.clean_short()
+        deleted_summary += cleaner.deleted_count
+        self.print_results()
+        self.reset_results()
+        self.clean_doubles()
+        self.print_results()
+        deleted_summary += cleaner.deleted_count
+        print(f'Deleted summary: {deleted_summary}')
+        if deleted_summary:
+            self.delete_ready_model()
+
     def clean_short(self):
         for file in os.listdir(self.target_dir):
             current_headers = list()
             current_shorts = list()
             need_deletion = False
-            with open(os.path.join(self.target_dir, file), 'r') as fd:
+            with open(os.path.join(self.target_dir, file), 'r', encoding='utf-8') as fd:
                 data = fd.read()
                 for h in data.split('\n'):
                     h_len = len(h.split(' '))
@@ -38,7 +52,7 @@ class Cleaner:
             current_headers = list()
             current_doubles = list()
             need_deletion = False
-            with open(os.path.join(self.target_dir, file), 'r') as fd:
+            with open(os.path.join(self.target_dir, file), 'r', encoding='utf-8') as fd:
                 data = fd.read()
                 for h in data.split('\n'):
                     if h in headers:
@@ -57,7 +71,7 @@ class Cleaner:
     def rewrite_file(self, current_headers, file):
         print(f'deleted from {file}')
         headers_to_write = '\n'.join(current_headers)
-        with open(os.path.join(self.target_dir, file), 'w') as fd:
+        with open(os.path.join(self.target_dir, file), 'w', encoding='utf-8') as fd:
             fd.write(headers_to_write)
 
     def print_results(self):
@@ -68,11 +82,13 @@ class Cleaner:
         self.deleted_count = 0
         self.was_count = 0
 
+    def delete_ready_model(self):
+        print('Deleting prepared mode ...')
+        model_file = os.path.join(self.target_dir, MODEL_FILENAME)
+        if os.path.isfile(model_file):
+            os.remove(model_file)
+
 
 if __name__ == "__main__":
-    cleaner = Cleaner('./grabbed_headers', MIN_LENGTH)
-    # cleaner.clean_short()
-    # cleaner.print_results()
-    # cleaner.reset_results()
-    cleaner.clean_doubles()
-    cleaner.print_results()
+    cleaner = Cleaner('./data', MIN_LENGTH)
+    cleaner.run()

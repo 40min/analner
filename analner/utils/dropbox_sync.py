@@ -32,7 +32,7 @@ class DropboxSync:
         """
         remote_file_path = local_file_path if remote_file_path is None else remote_file_path
         mode = dropbox.files.WriteMode.overwrite if overwrite else dropbox.files.WriteMode.add
-        with open(local_file_path, 'r') as fd:
+        with open(local_file_path, 'r', encoding='utf-8') as fd:
             content = fd.read()
         content = content.encode()
         try:
@@ -79,7 +79,7 @@ class DropboxSync:
                 self.sync_with_dropbox(new_local_dir, new_remote_dir, recursive)
             elif not os.path.exists(local_file):
                 content = self.get_file_content(entry.path_display)
-                with open(local_file, 'w') as fd:
+                with open(local_file, 'w', encoding='utf-8') as fd:
                     fd.write(content)
                 synced_count += 1
 

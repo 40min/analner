@@ -61,7 +61,7 @@ class HeadGrab:
         if not self.dropbox_syncer:
             self.dropbox_syncer = DropboxSync(self.dropbox_token)
         remote_filename = current_filename.strip('.')
-        self.dropbox_syncer.upload_file(current_filename, remote_filename)
+        self.dropbox_syncer.upload_file(current_filename, remote_filename, overwrite=True)
 
     def get_current_date_file_name(self):
         ts = datetime.now().strftime("%Y-%m-%d")

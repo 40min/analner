@@ -2,32 +2,32 @@ import os
 import logging
 import glob
 import markovify
-import spacy
+
+from analner.utils.dropbox_sync import DropboxSync
 
 READY_TO_USE_MODEL_FILE_NAME = 'news.json'
 MAX_ATTEMPTS_TO_GET_PHRASE = 100
 
-try:
-    nlp = spacy.load("xx")
-except OSError as e:
-    from spacy.cli import download
-    download('xx')
-
-
-class SpacyNewLinedText(markovify.NewlineText):
-    def word_split(self, sentence):
-        return ["::".join((word.orth_, word.pos_)) for word in nlp(sentence)]
-
-    def word_join(self, words):
-        sentence = " ".join(word.split("::")[0] for word in words)
-        return sentence
-
 
 class FunMaker:
 
-    def __init__(self, data_path):
+    dropbox_syncer = None
+
+    def __init__(self, data_path, dropbox_token=None):
         self.data_path = data_path
+        self.dropbox_token = dropbox_token
         self._text_model = self._get_model()
+        self.sync_with_dropbox()
+
+    def sync_with_dropbox(self):
+        if not self.dropbox_token:
+            return
+        if not self.dropbox_syncer:
+            self.dropbox_syncer = DropboxSync(self.dropbox_token)
+        remote_path = self.data_path.strip('.')
+        synced = self.dropbox_syncer.sync_with_dropbox(self.data_path, remote_path)
+        if synced:
+            self.reload_model_from_txt()
 
     def make_phrases(self, phrases_needed=1):
         result = []
@@ -50,9 +50,12 @@ class FunMaker:
         attempts = MAX_ATTEMPTS_TO_GET_PHRASE
         while attempts:
             attempts -= 1
-            s = self._text_model.make_sentence_with_start(with_phrase, strict=False)
-            if s:
-                return s
+            try:
+                s = self._text_model.make_sentence_with_start(with_phrase, strict=False)
+                if s:
+                    return s
+            except KeyError:
+                pass
         return None
 
     def reload_model_from_txt(self):
@@ -69,7 +72,7 @@ class FunMaker:
         text_model = self._load_saved_model(model_file)
         if not text_model:
             text_model = self._get_model_from_text()
-            with open(model_file, 'w') as saving:
+            with open(model_file, 'w', encoding='utf-8') as saving:
                 saving.write(text_model.to_json())
         return text_model
 
@@ -81,7 +84,7 @@ class FunMaker:
             with open(file, encoding='utf-8') as f:
                 text = f.read()
                 news_text = f'{news_text}\n{text}'
-        news_model = SpacyNewLinedText(news_text)
+        news_model = markovify.NewlineText(news_text)
 
         return news_model
 
@@ -90,21 +93,31 @@ class FunMaker:
         text_model = None
         if os.path.isfile(model_file):
             try:
-                with open(model_file, 'r') as saved:
-                    text_model = SpacyNewLinedText.from_json(saved.read())
+                with open(model_file, 'r', encoding='utf-8') as saved:
+                    text_model = markovify.NewlineText.from_json(saved.read())
             except ValueError:
                 logging.info("No JSON saved data found")
         return text_model
 
 
 if __name__ == "__main__":
+    dropbox_token = os.environ.get('DROPBOX_TOKEN')
     data_path = os.environ.get('DATA_PATH')
     if not data_path:
         raise Exception("Please setup path to storing data [data_path] var")
 
-    fm = FunMaker(data_path)
-    #fm.reload_model_from_txt()
-    for f in fm.make_phrases(5):
-        print(f)
+    print("Enter phrase to do 'with' or just leave empty:")
+    fm = FunMaker(data_path, dropbox_token)
+    while True:
+        phrase = 'No results'
+        with_phrase = str(input())
+        if with_phrase:
+            phrase = fm.make_phrases_with(with_phrase) or phrase
+        else:
+            phrases = fm.make_phrases()
+            phrase = phrases[0] if phrases else phrase
 
-    print(fm.make_phrases_with('список'))
+        print(phrase)
+
+
+

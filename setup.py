@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analner",
-    version="0.0.8",
+    version="0.0.9",
     author="Andrew Sorokin",
     author_email="i40mines@yandex.ru",
     description="Compiler of funny news based on onliner news",
@@ -28,5 +28,6 @@ setuptools.setup(
         'markovify>=0.7.1',
         'urllib3>=1.23',
         'webencodings==0.5.1',
+        'dropbox~=9.3'
     ],
 )

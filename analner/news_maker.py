@@ -84,6 +84,8 @@ class FunMaker:
             with open(file, encoding='utf-8') as f:
                 text = f.read()
                 news_text = f'{news_text}\n{text}'
+        if not news_text:
+            news_text = 'some stub text'
         news_model = markovify.NewlineText(news_text)
 
         return news_model

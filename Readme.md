@@ -21,6 +21,4 @@
 * create new files with ok phrases
 * try to del bad phrases
 
-last todo:
-* download lst grabbed and test on it
-* deploy to box
+* bugfix: add ability to setup custom dropbox folder

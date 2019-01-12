@@ -90,5 +90,9 @@ class Cleaner:
 
 
 if __name__ == "__main__":
-    cleaner = Cleaner('./data', MIN_LENGTH)
+    data_path = os.environ.get('DATA_PATH')
+    if not data_path:
+        raise Exception("Please setup path to storing data [data_path] var")
+
+    cleaner = Cleaner(data_path, MIN_LENGTH)
     cleaner.run()

@@ -100,4 +100,4 @@ ENV/
 
 .DS_Store
 
-./data
+data

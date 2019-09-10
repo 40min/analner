@@ -12,12 +12,15 @@ MAX_ATTEMPTS_TO_GET_PHRASE = 100
 class FunMaker:
 
     dropbox_syncer = None
+    _additional_texts: list = []
 
-    def __init__(self, data_path, dropbox_token=None):
+    def __init__(self, data_path, dropbox_token =None, additional_texts: list = None):
         self.data_path = data_path
         self.dropbox_token = dropbox_token
-        self._text_model = self._get_model()
         self.sync_with_dropbox()
+        if additional_texts:
+            self._additional_texts = additional_texts
+        self._text_model = self._get_model()
 
     def sync_with_dropbox(self):
         if not self.dropbox_token:
@@ -86,6 +89,8 @@ class FunMaker:
                 news_text = f'{news_text}\n{text}'
         if not news_text:
             news_text = 'some stub text'
+        if self._additional_texts:
+            news_text += "\n" . join(self._additional_texts)
         news_model = markovify.NewlineText(news_text)
 
         return news_model

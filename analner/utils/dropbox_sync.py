@@ -1,6 +1,14 @@
 import os
 import dropbox
-from dropbox.files import FolderMetadata
+import logging
+from dropbox.exceptions import (
+    ApiError,
+    HttpError
+)
+from dropbox.files import FolderMetadata, DeleteError
+
+
+logger = logging.getLogger(__name__)
 
 
 class DropboxSync:
@@ -37,10 +45,18 @@ class DropboxSync:
         content = content.encode()
         try:
             res = self.dbx.files_upload(content, remote_file_path, mode, mute=True)
-        except dropbox.exceptions.ApiError as err:
-            print('*** API error', err)
+        except ApiError as err:
+            logger.warning("*** API error %s ", err)
             return None
         return res
+
+    def delete_file(self, remote_file_path: str):
+        try:
+            self.dbx.files_delete_v2(remote_file_path)
+        except ApiError as e:
+            if not isinstance(e.error, DeleteError):
+                raise e
+            logger.warning("Failed to delete %s", remote_file_path)
 
     def get_file_content(self, path):
         """
@@ -50,8 +66,8 @@ class DropboxSync:
         """
         try:
             _, response = self.dbx.files_download(path)
-        except dropbox.exceptions.HttpError as err:
-            print('*** HTTP error', err)
+        except HttpError as err:
+            logger.warning("*** API error %s ", err)
             return None
 
         return response.content.decode()

@@ -24,7 +24,7 @@ setuptools.setup(
         'bs4==0.0.1',
         'certifi~=2018.4.16',
         'html5lib==1.0.1',
-        'lxml==4.2.1',
+        'lxml==4.6.2',
         'markovify>=0.7.1',
         'urllib3>=1.23',
         'webencodings==0.5.1',
